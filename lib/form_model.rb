@@ -1,0 +1,5 @@
+require "form_model/version"
+require "form_model/errors"
+require "form_model/mapper"
+require "form_model/associated_validation"
+require "form_model/model"
