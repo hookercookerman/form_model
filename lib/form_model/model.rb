@@ -6,11 +6,11 @@ require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/hash/keys'
 
 module FormModel
-  include Virtus
   extend ActiveSupport::Concern
   include ActiveModel::Validations
 
   included do
+    include Virtus
     class_attribute :after_read_block
     class_attribute :before_write_block
     class_attribute :bound_block
@@ -30,12 +30,6 @@ module FormModel
         assert_correct_model
         apply_mappers_to_form!
       end
-    end
-  end
-
-  module ClassMethods
-    def validates_associated(*args)
-      validates_with(FormModel::AssociatedValidator, _merge_attributes(args))
     end
   end
 
@@ -106,6 +100,10 @@ module FormModel
   end
 
   module ClassMethods
+    def validates_associated(*args)
+      validates_with(FormModel::AssociatedValidator, _merge_attributes(args))
+    end
+
     def bind_to(&block)
       self.bound_block = block
     end

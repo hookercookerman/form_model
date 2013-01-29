@@ -1,7 +1,7 @@
 class ProductForm
   include FormModel
   bind_to{Product}
-  
+
   # Attributes
   attribute :name, String
   attribute :title, String
