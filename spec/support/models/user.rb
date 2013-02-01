@@ -11,7 +11,7 @@ class User
     end
   end
 
-  def valid?
+  def valid?(context = nil)
     true
   end
 

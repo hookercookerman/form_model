@@ -33,8 +33,8 @@ module FormModel
     end
   end
 
-  def valid?(type = :model_and_form, context = nil)
-    return super(context) if type == :form
+  def valid?(context = nil)
+    return super(context) if !bound_model? || context == :form
     update_data_model!
     ok = (super(context) and data_model.valid?(context))
     merge_data_model_errors! unless ok
@@ -47,16 +47,16 @@ module FormModel
     end
   end
 
+  def form_valid?
+    valid?(:form)
+  end
+
   def bound_class
     self.class.bound_class
   end
 
   def save(options = {})
     valid?(options) ? data_model.save(options) : false
-  end
-
-  def form_valid?
-    valid?(:form)
   end
 
   def update(attrs = {})
@@ -85,13 +85,11 @@ module FormModel
   end
 
   def update_data_model!
-    if data_model
-      attrs = attributes.slice(*data_model_attribute_names).stringify_keys
-      apply_mappers_to_model!(attrs)
-      self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
-      data_model.write_attributes(attrs)
-      data_model
-    end
+    attrs = attributes.slice(*data_model_attribute_names).stringify_keys
+    apply_mappers_to_model!(attrs)
+    self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
+    data_model.write_attributes(attrs)
+    data_model
   end
 
   def respond_to?(method_sym, include_private = false)
@@ -120,7 +118,7 @@ module FormModel
     end
 
     def bound_class
-      @bound_class ||= self.bound_block.call
+      @bound_class ||= (self.bound_block and self.bound_block.call) || Hash
     end
 
     def form_attributes
@@ -130,13 +128,18 @@ module FormModel
     def load(data_model)
       data_model_attributes = data_model.attributes
       attrs = data_model_attributes.slice(*form_attributes)
-      self.new(data_model, attrs).tap do |instance|
+      form = self.new(data_model, attrs).tap do |instance|
         instance.instance_exec(&after_read_block) unless after_read_block.nil?
       end
+      block_given? ? yield(form) : form
     end
   end
 
   private
+  def bound_model?
+    !data_model.nil? || data_model.is_a?(Hash)
+  end
+
   def merge_data_model_errors!
     data_model.errors.to_hash.each do |key, value|
       self.errors.add(key, value)
