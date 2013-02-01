@@ -33,10 +33,10 @@ module FormModel
     end
   end
 
-  def valid?(type = :model_and_form)
-    return super if type == :form
+  def valid?(type = :model_and_form, context = nil)
+    return super(context) if type == :form
     update_data_model!
-    ok = (super and data_model.valid?)
+    ok = (super(context) and data_model.valid?(context))
     merge_data_model_errors! unless ok
     ok
   end
@@ -51,8 +51,8 @@ module FormModel
     self.class.bound_class
   end
 
-  def save
-    valid? ? data_model.save : false
+  def save(options = {})
+    valid?(options) ? data_model.save(options) : false
   end
 
   def form_valid?
@@ -85,14 +85,13 @@ module FormModel
   end
 
   def update_data_model!
-    unless data_model
-      @data_model = bound_class.new
+    if data_model
+      attrs = attributes.slice(*data_model_attribute_names).stringify_keys
+      apply_mappers_to_model!(attrs)
+      self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
+      data_model.write_attributes(attrs)
+      data_model
     end
-    attrs = attributes.slice(*data_model_attribute_names).stringify_keys
-    apply_mappers_to_model!(attrs)
-    self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
-    data_model.write_attributes(attrs)
-    data_model
   end
 
   def respond_to?(method_sym, include_private = false)
