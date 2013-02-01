@@ -21,12 +21,12 @@ module FormModel
     alias :model= :data_model=
     alias :model :data_model
 
-    def initialize(model, attributes = nil)
+    def initialize(model = bound_class.new, attributes = nil)
       if model.is_a?(Hash)
         super(model)
       else
         super(attributes)
-        @data_model = model
+        @data_model = model 
         assert_correct_model
         apply_mappers_to_form!
       end
