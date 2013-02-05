@@ -84,12 +84,21 @@ module FormModel
     data_model.to_path
   end
 
+  def apply_mappers!
+    apply_mappers_to_form!
+    self
+  end
+
   def update_data_model!
     attrs = attributes.slice(*data_model_attribute_names).stringify_keys
     apply_mappers_to_model!(attrs)
     self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
     data_model.write_attributes(attrs)
     data_model
+  end
+
+  def update_form!
+    self
   end
 
   def respond_to?(method_sym, include_private = false)

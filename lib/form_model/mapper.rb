@@ -64,7 +64,7 @@ module FormModel
 
     def form_value(form, key)
       if value_key = _form_keys_values[key]
-        form.send(value_key)
+        value_key.respond_to?(:call) ? value_key.call(form) : form.send(value_key)
       end
     end
 
@@ -74,7 +74,7 @@ module FormModel
 
     def model_value(model, key)
       if value_key = _model_keys_values[key]
-        model.send(value_key)
+        value_key.respond_to?(:call) ? value_key.call(model) : model.send(value_key)
       end
     end
 
@@ -104,12 +104,12 @@ module FormModel
     end
 
     def extract_form_options!(options)
-      raise Exception.new unless options.keys.all?{|key| _form_keys.include?(key)}
+      raise Exception.new("All Form Options were Not Given") unless options.keys.all?{|key| _form_keys.include?(key)}
       @_form_keys_values = options
     end
 
     def extract_model_options!(options)
-      raise Exception.new unless options.keys.all?{|key| _model_keys.include?(key)}
+      raise Exception.new("All Model Options were Not Given") unless options.keys.all?{|key| _model_keys.include?(key)}
       @_model_keys_values = options
     end
 
