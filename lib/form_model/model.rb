@@ -43,7 +43,9 @@ module FormModel
 
   def merge_errors_with!(object)
     object.errors.to_hash.each do |key, value|
-      self.errors.add(key, value)
+      Array(value).flatten.each do |error|
+        self.errors.add(key, error)
+      end
     end
   end
 
