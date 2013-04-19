@@ -21,12 +21,14 @@ module FormModel
     alias :model= :data_model=
     alias :model :data_model
 
-    def initialize(model = bound_class.new, attributes = nil)
-      if model.is_a?(Hash)
-        super(model)
+    def initialize(attrs_or_model = bound_class.new, attributes = nil)
+      if attrs_or_model.is_a?(Hash)
+        @given_attributes = attrs_or_model || {}
+        super(attrs_or_model)
       else
+        @given_attributes = attrs_or_model || {}
         super(attributes)
-        @data_model = model 
+        @data_model = attrs_or_model 
         assert_correct_model
         apply_mappers_to_form!
       end
@@ -64,6 +66,19 @@ module FormModel
   def update(attrs = {})
     self.attributes = attrs || {}
     self
+  end
+
+  def given_attributes
+    @given_attributes.with_indifferent_access
+  end
+
+  # useful for embedded forms
+  def update_from_given_attributes
+    self.attributes = data_model.attributes.slice(*form_attributes).merge(given_attributes)
+  end
+
+  def form_attributes
+    self.class.form_attributes
   end
 
   def persisted?
