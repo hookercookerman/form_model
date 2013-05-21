@@ -22,11 +22,11 @@ module FormModel
     alias :model :data_model
 
     def initialize(attrs_or_model = bound_class.new, attributes = nil)
+      @given_attributes = {}
       if attrs_or_model.is_a?(Hash)
         @given_attributes = attrs_or_model || {}
         super(attrs_or_model)
       else
-        @given_attributes = attrs_or_model || {}
         super(attributes)
         @data_model = attrs_or_model 
         assert_correct_model
@@ -64,6 +64,7 @@ module FormModel
   end
 
   def update(attrs = {})
+    @given_attributes = attrs
     self.attributes = attrs || {}
     self
   end
@@ -168,7 +169,9 @@ module FormModel
 
   def merge_data_model_errors!
     data_model.errors.to_hash.each do |key, value|
-      self.errors.add(key, value)
+      Array(value).flatten.each do |error|
+        self.errors.add(key, error)
+      end
     end
   end
 
