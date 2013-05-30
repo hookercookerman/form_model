@@ -83,7 +83,7 @@ module FormModel
   end
 
   def persisted?
-    data_model.persisted?
+    data_model ? data_model.persisted? : false
   end
 
   def to_model
