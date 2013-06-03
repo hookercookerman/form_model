@@ -15,7 +15,9 @@ module FormModel
     class_attribute :before_write_block
     class_attribute :bound_block
     class_attribute :mappers
+    class_attribute :extra_model_fields
     self.mappers = []
+    self.extra_model_fields = []
 
     attr_accessor :data_model
     alias :model= :data_model=
@@ -198,6 +200,6 @@ module FormModel
   end
 
   def data_model_attribute_names
-    data_model.fields.keys.map(&:to_sym) + data_model.relations.keys.map(&:to_sym)
+    data_model.fields.keys.map(&:to_sym) + data_model.relations.keys.map(&:to_sym) + extra_model_fields
   end
 end
