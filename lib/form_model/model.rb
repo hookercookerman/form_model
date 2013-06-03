@@ -112,7 +112,7 @@ module FormModel
   def update_data_model!
     attrs = attributes.slice(*data_model_attribute_names).stringify_keys
     apply_mappers_to_model!(attrs)
-    self.instance_exec(&before_write_block) unless self.class.before_write_block.nil?
+    self.instance_exec(attrs, &before_write_block) unless self.class.before_write_block.nil?
     data_model.write_attributes(attrs)
     data_model
   end
